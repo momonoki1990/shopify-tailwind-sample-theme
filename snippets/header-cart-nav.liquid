@@ -1,0 +1,189 @@
+<form action="{{ routes.cart_url }}" method="post" novalidate class="cart-nav__form h-full">
+  <div class="cart-nav__header-wrapper justify-between flex flex-col h-full pt-5">
+    <div class="cart-nav__header h-10">
+      <div class="cart-nav__title text-center">
+        <i class="fas fa-shopping-cart text-blue-500" aria-hidden="true"></i>
+        <span class="font-black">ショッピングカート</span>
+      </div>
+      <button class="cart-nav__close-btn absolute right-1.5 text-2xl top-1" type="button" data-drawer-close-btn="true"
+        data-drawer-target="cart-nav">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div id="cart-nav__items" class="flex-grow pl-4 pr-8 sm:pr-12 overflow-scroll"></div>
+    <div class="cart-nav__bottom border-t border-gray-200 h-1/6 pt-4 translate-y-0">
+      <div class="cart-nav__total text-center">
+        <div class="cart-nav__total-title font-black">商品合計(税込)</div>
+        <div id="cart-nav__total-price" class="cart-nav__total-price">¥10000</div>
+      </div>
+      <div class="cart-nav__btn-wrapper mt-4 text-center">
+        <button type="submit" name="checkout" class="cart-nav__checkout-btn bg-blue-500 hover:bg-opacity-80 font-black rounded py-3 text-white
+          w-3/4">レジへ進む</button>
+      </div>
+    </div>
+  </div>
+</form>
+
+
+<script type="application/json" id="cart-nav__initial-data">
+  {{ cart.items | json }}
+</script>
+
+<script type="application/json" id="cart-nav__initial-sum">
+  {{ cart.total_price | json }}
+</script>
+
+<template id="cart-nav__item-template">
+  <div class="cart-nav__item mt-8 flex items-start">
+    <figure class="cart-nav__item-img square-image-wrapper w-3/12">
+      <a>
+        <img src="" alt="" class="">
+      </a>
+    </figure>
+    <div class="cart-nav__item-details ml-6 w-8/12">
+      <a class="block">
+        <span class="cart-nav__item-title block"></span>
+        <span class="cart-nav__item-variant block text-gray-400"></span>
+      </a>
+      <div class="cart-nav__item-price mt-3"></div>
+      <div class="cart-nav__item-quantity mt-3">
+        <div class="cart-nav__quantity-control inline-block">
+          <button type="button" onclick="updateVariantQuantity(event)"
+            class="cart-nav__quantity-minus bg-gray-200 border border-gray-300 h-8 text-blue-600 rounded-l
+            w-8">-</button><input
+            type="text" min="1" class="cart-nav__quantity-count border-t border-b border-gray-300 h-8 inline-block
+            text-center
+            text-sm w-10"><button type="button" onclick="updateVariantQuantity(event)"
+            class="cart-nav__quantity-plus bg-gray-200 border border-gray-300 h-8 text-blue-600 rounded-r
+            w-8">+</button>
+        </div>
+        <div class="inline-block"><a onclick="updateVariantQuantity(event)" data-new-quantity="0"
+            class="cart-nav__item-remove inline-block cursor-pointer sm:ml-10 ml-4 underline">削除</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script type="text/javascript">
+  // カートを描画する関数
+  const showCartItems = (items) => {
+
+    const template = document.getElementById("cart-nav__item-template").content;
+
+    const fragment = document.createDocumentFragment();
+
+    for (const item of items) {
+      const {
+        variant_id: variantId,
+        image: imgSrc,
+        product_title: title,
+        variant_title: variantTitle
+      } = item;
+      const price = item.price / 100;
+      const quantity = Number(item.quantity);
+
+      const clone = document.importNode(template, true);
+
+      clone.querySelector(".cart-nav__item").setAttribute("id", `cart-nav__item-${variantId}`);
+      clone.querySelector(".cart-nav__quantity-count").setAttribute("id",
+      `cart-nav__quantity-${variantId}`);
+
+      clone.querySelector(".cart-nav__quantity-minus").setAttribute("data-variant-id",
+      variantId);
+      clone.querySelector(".cart-nav__quantity-minus").setAttribute("data-new-quantity",
+      quantity - 1);
+
+      clone.querySelector(".cart-nav__quantity-plus").setAttribute("data-variant-id",
+      variantId);
+      clone.querySelector(".cart-nav__quantity-plus").setAttribute("data-new-quantity",
+      quantity + 1);
+
+      clone.querySelector(".cart-nav__item-remove").setAttribute("data-variant-id", variantId);
+
+      clone.querySelector(".cart-nav__item-img img").src = imgSrc;
+      clone.querySelector(".cart-nav__item-title").textContent = title;
+      clone.querySelector(".cart-nav__item-variant").textContent = variantTitle;
+      clone.querySelector(".cart-nav__item-price").textContent = price.toLocaleString('ja-JP', {
+        style: 'currency',
+        currency: 'JPY'
+      });
+      clone.querySelector(".cart-nav__quantity-count").value = quantity;
+
+      fragment.appendChild(clone);
+    }
+
+    document.getElementById("cart-nav__items").innerHTML = "";
+    document.getElementById("cart-nav__items").appendChild(fragment);
+
+  }
+</script>
+
+<script type="text/javascript">
+  // 合計金額を表示する関数
+  // templates/product.liquidの「カートに入れる」でも使用して、カートドロワーを更新する
+  const showTotalPrice = (totalPrice) => {
+    document.getElementById("cart-nav__total-price").textContent = totalPrice.toLocaleString('ja-JP', {
+      style: 'currency',
+      currency: 'JPY'
+    });
+  }
+</script>
+
+<script type="text/javascript">
+  // AjaxAPIから返ってきたレスポンスデータを元に、カートの内容を更新する関数
+  // templates/product.liquidの「カートに入れる」でも使用して、カートドロワーを更新する
+  const showItemsAndTotalPrice = (responseData) => {
+    const { items } = responseData;
+    const totalPrice = JSON.parse(responseData["total_price"]) / 100;
+
+    showCartItems(items);
+
+    showTotalPrice(totalPrice);
+  }
+</script>
+
+<script type="module">
+  // カートの初期状態を表示
+  const showInitialCart = () => {
+    const initialItems = JSON.parse(document.getElementById("cart-nav__initial-data").textContent);
+
+    showCartItems(initialItems);
+
+    // 確か商品合計金額はcartオブジェクトにないので、個別に合計金額を取得している
+    const initialTotalPrice = JSON.parse(document.getElementById("cart-nav__initial-sum").textContent) / 100;
+
+    showTotalPrice(initialTotalPrice);
+  }
+
+  showInitialCart();
+</script>
+
+<script type="text/javascript">
+  // カートの状態を更新するクリックハンドラ
+  const updateVariantQuantity = async (event) => {
+    const currentTarget = event.currentTarget;
+    const variantId = currentTarget.getAttribute("data-variant-id");
+    const newQuantity = Number(currentTarget.getAttribute("data-new-quantity"));
+
+    const newData = {
+      updates: {
+        [variantId]: newQuantity
+      }
+    }
+
+    const data = await fetch("/cart/update.js", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(newData)
+    }).then(response => {
+      return response.json()
+    }).catch(err => {
+      console.error(err)
+    });
+    
+    showItemsAndTotalPrice(data);
+  }
+</script>

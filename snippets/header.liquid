@@ -1,0 +1,116 @@
+<header id="header" class="w-full sticky top-0 z-30">
+  <!-- PC版ヘッダー -->
+  <nav class="pc-header bg-shop-main hidden lg:block py-4 w-full">
+    <div class="pc-header__inner flex container items-center justify-between mx-auto px-8">
+      <div class="pc-header__left flex items-center justify-start">
+        <div class="pc-header__logo">
+          <a class="text-white text-2xl" href="/">My Sample Store</a>
+        </div>
+      </div>
+      <div class="pc-header__right">
+        <nav class="pc-header__links flex items-center">
+          {% if customer %}
+          <span class="pc-header__account"><a class="text-white" href="/account">マイページ</a></span>
+          <span class="pc-header__logout ml-7"><a class="text-white" href="/account/logout">ログアウト</a></span>
+          {% else %}
+          <span class="pc-header__signup"><a class="text-white" href="/account/register">新規登録</a></span>
+          <span class="pc-header__login ml-7"><a class="text-white" href="/account/login">ログイン</a></span>
+          {% endif %}
+          <span class="pc-header__search ml-7">
+            <button onclick="document.getElementById('header__search-input').focus();"
+              class="drawer__btn"
+              data-drawer-btn="true" data-drawer-target="header__search-box">
+              <i class="fas fa-search text-2xl text-white"></i>
+            </button>
+          </span>
+          <span class="pc-header__cart align-middle ml-7">
+            <button class="drawer__btn" type="button" data-drawer-btn="true" data-drawer-target="cart-nav">
+              <i class="fas fa-shopping-cart text-2xl text-white"></i>
+            </button>
+          </span>
+        </nav>
+      </div>
+    </div>
+  </nav>
+  
+
+  <!-- SP版ヘッダー -->
+  <nav class="sp-header bg-shop-main lg:hidden px-4 pt-4 pb-3 text-white w-full">
+    <div class="sp-header__inner mx-auto relative text-center">
+      <div class="hamburger-menu absolute left-0">
+        <button class="drawer__btn" data-drawer-btn="true" data-drawer-target="hamburger-nav">
+          <i class="fas fa-bars text-2xl text-white"></i>
+        </button>
+      </div>
+      <div class="sp-header__logo inline-block">
+        <a class="text-white text-2xl" href="/">My Sample Store</a>
+      </div>
+      <nav class="sp-header__links absolute flex items-center right-0 top-0">
+        <span class="sp-header__search">
+          <button onclick="document.getElementById('header__search-input').focus()" class="drawer__btn"
+            data-drawer-btn="true" data-drawer-target="header__search-box">
+            <i class="fas fa-search text-2xl text-white"></i>
+          </button>
+        </span>
+        <span class="sp-header__cart align-middle ml-4 text-xl">
+          <button class="drawer__btn" data-drawer-btn="true" data-drawer-target="cart-nav">
+            <i class="fas fa-shopping-cart text-2xl text-white"></i>
+          </button>
+        </span>
+      </nasv>
+    </div>
+  </nav>
+
+</header>
+
+
+
+<!-- ハンバーガーメニューのナビゲーション -->
+<nav class="drawer bg-white fixed h-full inset-0 overflow-auto text-black transform -translate-x-80
+          transition-transform w-80 z-50" id="hamburger-nav" data-drawer="true">
+  <div>
+    <button class="drawer__close-btn absolute right-1.5 text-2xl top-1" data-drawer-close-btn="true"
+      data-drawer-target="hamburger-nav"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="drawer__menu">
+    <div class="drawer__section">
+      <div class="drawer__title bg-gray-100 px-4 py-2 text-gray-400 text-xs">リンク</div>
+      <ul>
+        <li class="text-base border-b px-4 py-3 text-gray-700"><a href="/">ホーム</a></li>
+      </ul>
+    </div>
+    <div class="drawer__section">
+      <div class="drawer__title bg-gray-100 px-4 py-2 text-gray-400 text-xs">アカウント</div>
+      <ul>
+        {% if customer %}
+        <li class="text-base border-b px-4 py-3 text-gray-700"><a href="/account">マイページ</a></li>
+        <li class="text-base border-b px-4 py-3 text-gray-700"><a href="/account/logout">ログアウト</a></li>
+        {% else %}
+        <li class="text-base border-b px-4 py-3 text-gray-700"><a href="/account/register">新規登録</a></li>
+        <li class="text-base border-b px-4 py-3 text-gray-700"><a href="/account/login">ログイン</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- カートのナビゲーションメニュー -->
+<nav class="drawer bg-white fixed h-full overflow-auto right-0 text-black top-0 transform translate-x-80
+          sm:translate-x-96 transition-transform w-80 sm:w-96 z-50" id="cart-nav" data-drawer="true">
+  {% render 'header-cart-nav' %}
+</nav>
+
+<!-- 検索ボックス -->
+<form action="/search">
+  <div id="header__search-box" class="header__search-box bg-white border fixed flex lg:h-24 h-20 items-center justify-center right-0 top-0
+  transform -translate-y-20 lg:-translate-y-24 transition-transform w-full lg:w-1/3 z-50">
+    <div class="header__search-icon"><button><i class="fas fa-search text-2xl"></i></button></div>
+    <input type="hidden" name="type" value="product" />
+    <input id="header__search-input" type="text" name="q" placeholder="商品を検索できます"
+      class="inline-block focus:outline-none overflow-hidden p-3 placeholder-gray-500 w-9/12">
+    <button type="button" class="header__search-close text-2xl" data-drawer-close-btn="true"
+      data-drawer-target="header__search-box">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+</form>

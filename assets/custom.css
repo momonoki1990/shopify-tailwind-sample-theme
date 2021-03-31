@@ -1,0 +1,176 @@
+/* フォントファミリー */
+* {
+  color: #333;
+}
+
+/* 基本のフォントサイズ */
+body {
+  font-size: 13px;
+}
+
+/* Font Awesome */
+.fa,
+.far,
+.fas {
+  font-family: "Font Awesome\ 5 Free"!important;
+}
+
+.fab {
+  font-family: "Font Awesome 5 Brands" !important;
+}
+
+/* テーブル */
+table td,
+table th {
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  border-bottom: 1px solid #eaeaea;
+  padding: .5rem;
+}
+
+.product-page__description table td,
+.product-page__description table th {
+  vertical-align: top;
+}
+
+
+/* Tailwindを上書き */
+@media screen and (min-width: 1536px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+
+
+
+/* ヘルパークラス */
+
+/* ボタン */
+.btn-main {
+  background-color: #fff;
+  border: 1px solid #333 !important;
+  color: #333;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 12px;
+}
+
+.btn-second {
+  background-color: #333 !important;
+  border: 1px solid #333 !important;
+  color: #fff !important;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.btn-second {
+  opacity: 0.8;
+}
+
+
+#shopify-section-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+
+
+
+/* 商品詳細ページ */
+.option-item-soldout {
+  opacity: 0.6;
+  pointer-events: none;
+  text-decoration: line-through;
+}
+
+
+/* 今すぐ購入するボタン */
+.shopify-payment-button__button {
+  background-color: #333 !important;
+  border: 1px solid #333 !important;
+  border-radius: 0;
+  color: #fff !important;
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.shopify-payment-button__button:hover {
+  opacity: 0.8;
+}
+
+.btn-main:hover {
+  opacity: 0.8;
+}
+
+/* 画像のwrapperにセットして、正方形表示する */
+.square-image-wrapper {
+  overflow: hidden;
+  position: relative;
+}
+
+.square-image-wrapper::before {
+  content: "";
+  display: block;
+  padding-top: 100%;
+}
+
+.square-image-wrapper img {
+  height: 100%;
+  left: 0;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+/* ドロワー */
+.drawer-open {
+  transform: translate(0px);
+}
+
+.fade-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background-color: #000000;
+  opacity: 0.5;
+  z-index: 40;
+}
+
+
+/* 商品詳細ページ */
+.option-item__radio:checked+label {
+  border: 1px solid #333;
+}
+
+
+/* Swiper */
+.swiper-button-prev::after,
+.swiper-button-next::after {
+  content: none;
+}
+
+.swiper-button-disabled {
+  opacity: 1;
+}
+
+.product-page__product-images--sp .swiper-pagination {
+  margin-top: 0.75rem;
+  position: static;
+}
+
+.product-page__product-images--sp .swiper-pagination-bullet {
+  background-color: #333;
+  display: inline-block;
+  height: 12px;
+  margin: 0 1rem 1.75rem !important;
+  width: 12px;
+}

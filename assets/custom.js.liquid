@@ -1,0 +1,79 @@
+// 本ファイルの読み込み箇所はbodyの閉じタグの直前なので、 window.addEventListener('DOMContentLoaded')は不要
+
+/* helper */
+
+// リロード
+const redirectToCurrentPage = () => {
+  location.href = location.href;
+}
+
+
+// クラス名をまとめて付与・削除する関数
+const addClassesTo = (target, ...classes) => {
+  classes.map(eachClass => target.classList.add(eachClass));
+}
+
+const removeClassesFrom = (target, ...classes) => {
+  classes.map((eachClass) => target.classList.remove(eachClass));
+};
+
+
+/* ドロワー */
+
+// フェードレイヤーを生成しておく
+// フェードレイヤーにはドロワーを閉じる&フェードレイヤーを非表示にするクリックイベントを仕掛けておく
+(() => {
+  const body = document.querySelector('body');
+  const fadeLayer = document.createElement('div');
+  fadeLayer.setAttribute('id', 'fade-layer');
+  fadeLayer.classList.add('fade-layer', 'hidden');
+
+  fadeLayer.addEventListener('click', () => {
+    const openingDrawer = document.getElementsByClassName('drawer-open')[0];
+    openingDrawer.classList.remove('drawer-open');
+    fadeLayer.classList.add('hidden');
+
+    // フェードレイヤーが消える時、bodyのoverflow:hidden（スクロール禁止）も解除する
+    document.querySelector("body").classList.remove("overflow-hidden");
+  })
+  body.append(fadeLayer);
+})();
+
+
+// フェードレイヤーの表示・非表示切り替え
+const toggleFadeLayer = () => {
+  const fadeLayer = document.getElementById('fade-layer');
+  fadeLayer.classList.toggle('hidden');
+
+  // フェードレイヤーが開いている時に、bodyにoverflow:hiddenを加えることで、ドロワー外はスクロールできないようにする
+  document.querySelector('body').classList.toggle('overflow-hidden');
+}
+
+
+// ドロワーの表示・非表示切り替え
+const toggleDrawer = (event) => {
+  const target = event.currentTarget;
+  const drawerTarget = target.getAttribute('data-drawer-target');
+  const drawer = document.getElementById(drawerTarget);
+  drawer.classList.toggle('drawer-open');
+}
+
+
+// ドロワーの開閉ボタンにクリックイベントを仕込む
+const drawers = document.querySelectorAll('[data-drawer-btn="true"]');
+drawers.forEach((drawer) => {
+  drawer.addEventListener("click", (event) => {
+    toggleDrawer(event);
+    toggleFadeLayer()
+  })
+})
+
+
+// ドロワーを閉じるボタンにクリックイベントを仕込む
+const drawerCloseBtns = document.querySelectorAll('[data-drawer-close-btn="true"]');
+drawerCloseBtns.forEach(closeBtn => {
+  closeBtn.addEventListener('click', (event) => {
+    toggleDrawer(event);
+    toggleFadeLayer();
+  })
+})

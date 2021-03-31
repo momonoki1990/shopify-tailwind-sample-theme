@@ -1,0 +1,434 @@
+<div class="product-page">
+  <!-- パンクズリスト -->
+  <nav class="bread-crumb pt-4">
+    <a class="align-bottom text-gray-500" href="/" title="ホームに戻る">ホーム</a>
+    {% if collection %}
+    <span class="text-gray-500">&rsaquo;</span>
+    <a class="text-gray-500"
+      href="/{{collection.url}}">{{ collection.title }}</a>
+    {% endif %}
+    <span class="text-gray-500">&rsaquo;</span>
+    <span
+      class="align-bottom inline-block text-gray-500">{{ product.title }}</span>
+  </nav>
+  
+  {% assign current_variant = product.selected_or_first_available_variant %}
+  {% assign featured_image = current_variant.featured_image | default: product.featured_image %}
+
+  <article class="product-page__body">
+
+    <!-- 商品詳細 -->
+    <section class="product-page__product gap-8 grid grid-cols-12 md:mt-10 mt-2">
+
+      <!-- 商品画像(PC) -->
+      <div class="product-page__product-images--pc md:block col-span-7 hidden">
+
+        <!-- 商品画像(メイン) -->
+        <figure id="product-images__main-image" class="product-images__main-image square-image-wrapper">
+          <img class="cursor-crosshair" src="{{ featured_image | img_url: 'original' }}"
+            alt="{{ featured_image.alt | escape }}">
+        </figure>
+
+        <!-- 商品画像(サブ) -->
+        <div id="product-images__other-images" class="product-images__other-images p-12 relative">
+          <div class="swiper-container">
+            <div class="swiper-wrapper">
+              {% for image in product.images %}
+              <figure class="swiper-slide square-image-wrapper">
+                <a class="{% if forloop.index0 == 0 %}pointer-events-none{% endif %}" onclick="changeMainImage(event)"
+                  data-image-id="{{ image.id }}">
+                  <img class="" src="{{ image | img_url: 'original' }}" alt="">
+                </a>
+              </figure>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Swiperボタン関連 -->
+          <div class="swiper-button-prev -left-1"><i
+              class="fas fa-chevron-left fa-lg text-gray-600"></i>
+          </div>
+          <div class="swiper-button-next -right-1"><i
+              class="fas fa-chevron-right fa-lg text-gray-600"></i></div>
+        </div>
+      </div>
+
+      
+      <!-- 商品画像(SP) -->
+      <div class="product-page__product-images--sp product-images col-span-12 md:hidden">
+
+        <!-- 商品画像(Swiper) -->
+        <div class="swiper-container">
+          <div class="swiper-wrapper">
+            {% for image in product.images %}
+            <div class="swiper-slide">
+              <figure class="product-images__main-image square-image-wrapper">
+                <img class="" src="{{ image | img_url: 'original' }}" alt="{{ image.alt | escape }}">
+              </figure>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="swiper-pagination"></div>
+        </div>
+      </div>
+
+
+      <!-- 商品詳細 -->
+      <div class="product-page__product-details md:col-span-5 col-span-12">
+
+        <!-- 商品タイトル -->
+        <div class="product-page__title -mt-4 md:mt-0 leading-10 md:text-lg">
+          {{ product.title }}
+        </div>
+
+        <!-- カートに入れるフォーム -->
+        {% form 'product', product, id: 'product-page__cart-form' %}
+
+        <!-- 価格 -->
+        {% comment %}availableの値に応じて表示内容を切り替える{% endcomment %}
+        {% if current_variant.available %}
+          {% assign priceText = current_variant.price | money %}
+          {% assign compareAtPriceText = current_variant.compare_at_price | money %}
+          {% assign addBtnText = 'カートに入れる' %}
+        {% else %}
+          {% assign priceText = 'SOLD OUT' %}
+          {% assign compareAtPriceText = '' %}
+          {% assign addBtnText = 'SOLD OUT' %}
+        {% endif %}
+        <div id="product-page__prices" class="product-page__price mt-5">
+          <span id="product-page__price"
+            class="product-page__price inline-block
+            text-2xl">{{ priceText }}</span>
+          {% if current_variant.compare_at_price %}
+          <span id="product-page__compare-price" class="product-page__compare-price inline-block line-through ml-1
+          text-gray-400">{{ compareAtPriceText }}</span>
+          {% endif %}
+        </div>
+
+        <!-- オプション -->
+        <div class="product-page__options">
+          {% for product_option in product.options_with_values %}
+          <div class="option-item  mt-6">
+            <div class="option-item__title">{{ product_option.name }}</div>
+            <div class="option-item__values">
+              {% for value in product_option.values %}
+              <input id="option-item__{{ product_option.name }}-{{ value }}" class="option-item__radio hidden"
+                type="radio" onchange="changeVariant()" name='{{ product_option.name }}' value="{{ value }}"
+                data-option-position="{{ product_option.position }}"
+                {%if product_option.selected_value == value %}checked{%endif%}>
+              <label for="option-item__{{ product_option.name }}-{{ value }}"
+                class="option-item__value border border-gray-200 cursor-pointer inline-block mt-2 mr-2 px-3 py-3 text-center"
+                style="min-width: 50px;">{{ value }}</label>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <input id="product-page__variant-id" type="hidden" name="id" value="{{ current_variant.id }}">
+
+        <!-- 数量 -->
+        <div class="product-page__quantity">
+          <div class="quantity-control grid grid-cols-12 mt-6 lg:w-48 w-full">
+            <button type="button" onclick="changeQuantity(event)" data-quantity-control-type="minus"
+              class="quantity-minus border-t border-l border-b border-gray-900 col-span-3 h-12">-</button><input
+              class="quantity-count border-t border-b border-gray-900 col-span-6 h-12 inline-block text-center
+              text-sm" type="text" name="quantity" min="1" value="1"><button type="button"
+              onclick="changeQuantity(event)" data-quantity-control-type="plus" class="quantity-plus border-t border-r
+              border-b border-gray-900 col-span-3 h-12">+</button>
+          </div>
+        </div>
+
+        <!-- カートに入れる・今すぐ購入ボタン -->
+        <div class="product-page__btn-wrapper mt-4 text-center">
+          <button id="product-page__add-btn" class="add-btn btn-main w-full {% unless current_variant.available %}mb-4 opacity-60 pointer-events-none{% endunless %}" type="button"
+            onclick="addToCart()">{{ addBtnText }}</button>
+          {{ form | payment_button }}
+        </div>
+        {% endform %}
+
+        <!-- 商品説明 -->
+        <div class="product-page__description">
+          {{ product.description }}
+        </div>
+
+        <!-- SNSシェア -->
+        <div class="product-page__sns-btns mt-16">
+          {% render 'sns-share' %}
+        </div>
+
+      </div>
+    </section>
+
+  </article>
+</div>
+
+
+
+
+
+
+
+<!-- JS -->
+
+<!-- Swiper -->
+
+<script type="module">
+  // Swiperの初期化
+  import Swiper from 'https://unpkg.com/swiper/swiper-bundle.esm.browser.min.js'
+
+  let slidesPerView = 1;
+
+  if (window.innerWidth >= 768) {
+    slidesPerView = 5
+  }
+
+  const swiper = new Swiper('.swiper-container', {
+  navigation: {
+  nextEl: '.swiper-button-next',
+  prevEl: '.swiper-button-prev',
+  },
+  pagination: {
+  el: '.swiper-pagination',
+  type: 'bullets',
+  clickable: true,
+  },
+  loop: true,
+  slidesPerView: slidesPerView,
+  spaceBetween: 20
+  })
+</script>
+
+
+
+
+
+<!-- 商品画像関連 -->
+
+<script type="text/javascript">
+  // 拡大画像にマウスオーバーで拡大するイベント付与する関数
+  const addEventsOnMagnifyImage = (targetImg) => {
+    document.querySelector(targetImg).addEventListener('mousemove', (event) => {
+      // event.offsetXとoffsetYを中心に、画像をzoomする
+      event.currentTarget.setAttribute('style', `transform-origin: ${event.offsetX}px ${event.offsetY}px; transform:
+    scale(1.5);`);
+
+    })
+
+    document.querySelector(targetImg).addEventListener('mouseleave', (event) => {
+      event.currentTarget.setAttribute('style', '');
+    })
+  }
+
+  // 初期表示のmain-imageにイベント付与
+  addEventsOnMagnifyImage('#product-images__main-image img');
+</script>
+
+
+
+<script type="text/javascript">
+  // 拡大表示の画像を変えるクリックハンドラ
+  const changeMainImage = (event) => {
+
+    // pointer-events-noneを既存の画像から取り除き、選択した画像に付与
+    document.querySelector('#product-images__other-images .pointer-events-none').classList.remove('pointer-events-none');
+    const currentTarget = event.currentTarget;
+    currentTarget.classList.add('pointer-events-none');
+
+    // main-imageを初期化
+    const mainImage = document.querySelector('#product-images__main-image');
+    mainImage.innerHTML = ''
+
+    // 選択された画像を取得して、main-imageに表示
+    const selectedImage = document.importNode(event.currentTarget.querySelector('img'), true);
+    selectedImage.classList.remove('hidden');
+    mainImage.appendChild(selectedImage);
+
+    // 画像を拡大するイベントを再度付与
+    addEventsOnMagnifyImage('#product-images__main-image img');
+  }
+</script>
+
+
+
+
+
+
+<!-- バリエーション関係 -->
+
+<script type="application/json" id="product-page__variants-json">
+  {{ product.variants | json }}
+</script>
+
+
+
+<script type="application/json" id="product-page__options-json">
+  {{ product.options | json }}
+</script>
+
+<script type="application/json" id="product-page__current-variant--json">
+  {{ current_variant | json }}
+</script>
+
+
+
+<script type="module">
+  // 初期表示のバリエーションが売り切れだった場合、「今すぐ購入」ボタンを非表示にする
+  const currentVariant = JSON.parse(document.getElementById('product-page__current-variant--json').textContent);
+  if (!currentVariant.available) {
+    document.querySelector('.shopify-payment-button').classList.add('hidden')
+  }
+</script>
+
+
+
+<script type="text/javascript">
+  // variantのoptionのradioボタンのonchangrハンドラ
+  // 選択されたradioボタンの値を取得し、価格などバリエーションの情報を書き換える
+  const changeVariant = (event) => {
+
+    // optionsでループを回してcheckedされたvalueを取得し、タイトルとしてつなぎ合わせる
+    const options = JSON.parse(document.getElementById('product-page__options-json').textContent);
+    let variantTitle = '';
+    for (const option of options) {
+      document.getElementsByName(option).forEach(radio => {
+        if (radio.checked) {
+          variantTitle += !!variantTitle ? ` / ${radio.value}` : radio.value;
+        }
+      })
+    }
+
+    // タイトルが一致するvariantオブジェクトをproduct.variantsから取得する
+    const variants = JSON.parse(document.getElementById("product-page__variants-json").textContent);
+    const selectedVariant = variants.find(variant => variant.title === variantTitle);
+
+
+    // variantオブジェクトから価格などの情報を取得し、描画する
+    const {
+      id,
+      price,
+      compare_at_price: compareAtPrice,
+      available
+    } = selectedVariant;
+
+    const priceNode = document.getElementById('product-page__price');
+    const compareAtPriceNode = document.getElementById('product-page__compare-price');
+    const addBtn = document.getElementById('product-page__add-btn');
+    const buyNowBtn = document.querySelector('.shopify-payment-button');
+
+    // availableの値に応じて表示を切り替える
+    if (available) {
+      priceNode.textContent = `¥${(Number(price) / 100).toLocaleString()}`;
+      compareAtPriceNode.textContent = compareAtPrice ? `¥${(Number(compareAtPrice) / 100).toLocaleString()}` : '';
+      addBtn.textContent = 'カートに入れる';
+      removeClassesFrom(addBtn, 'pointer-events-none', 'opacity-60', 'mb-4')
+      buyNowBtn.classList.remove('hidden');
+    } else {
+      priceNode.textContent = 'SOLD OUT';
+      compareAtPriceNode.textContent = '';
+      addBtn.textContent = 'SOLD OUT';
+      addClassesTo(addBtn, 'pointer-events-none', 'opacity-60', 'mb-4')
+      buyNowBtn.classList.add('hidden');
+    }
+
+
+    // formのvariant_idも書き換える
+    document.getElementById('product-page__variant-id').value = id;
+    
+
+    // クエリパラメータのvariant_idを書き換える
+    const queryParams = new URLSearchParams(location.search);
+    queryParams.set('variant', id)
+    history.replaceState(null, null, `?${queryParams.toString()}`);
+  }
+</script>
+
+
+
+<script type="module">
+  // そのoption-itemに関して全てのvariantで売り切れだった場合、.option-item-soldoutを付与
+  const addSoldOutClassOnUnavailableOptionItem = () => {
+    const optionItems = document.getElementsByClassName('option-item__radio');
+    const variants = JSON.parse(document.getElementById('product-page__variants-json').textContent);
+    for (const optionItem of optionItems) {
+      const optionValue = optionItem.value;
+      const optionPostion = optionItem.getAttribute('data-option-position');
+      const availableVariant = variants.find(variant => variant[`option${optionPostion}`] === optionValue &&
+      variant.available === true )
+      
+      !!availableVariant || optionItem.nextElementSibling.classList.add('option-item-soldout')
+    }
+  }
+
+  addSoldOutClassOnUnavailableOptionItem();
+</script>
+
+
+
+
+
+
+<!-- 「カートに入れる」フォーム関連 -->
+
+<script type="text/javascript">
+  // 数量を増減するクリックハンドラ
+  const changeQuantity = (event) => {
+    const currentTarget = event.currentTarget;
+    const quantityControlType = currentTarget.getAttribute('data-quantity-control-type');
+    const quantityCount = currentTarget.parentNode.querySelector('input');
+
+    // input type="number"のvalueのデータ型はあくまでstringなので、一旦Numberに変換した上でまたStringに戻す
+    if (quantityControlType == 'minus') {
+      // 0以下にはしたくないので、valueが1でminusの時は処理を抜ける
+      if (quantityCount.value == 1) {
+        return '';
+      }
+      quantityCount.value = String(Number(quantityCount.value) - 1);
+    } else {
+      quantityCount.value = String(Number(quantityCount.value) + 1);
+    }
+  }
+</script>
+
+
+
+<script type="text/javascript">
+  // 「カートに入れる」ボタンのクリックハンドラ
+  const addToCart = async () => {
+    // ローディングアイコンを表示
+    document.getElementById('product-page__add-btn').innerHTML = '<div class="loader"></div>'
+
+    const addToCartForm = document.getElementById('product-page__cart-form');
+    const formData = new FormData(addToCartForm);
+    await fetch('/cart/add.js', {
+      method: 'POST',
+      body: formData
+    }).then(response => {
+      return response.json();
+    }).catch(err => {
+      console.error('Error', err);
+    })
+
+    // 上記のレスポンスは更新したvariantに関するものだけなので、カート情報を取得する
+
+    const data = await fetch('/cart.js', {
+      method: 'GET',
+    }).then(response => {
+      return response.json();
+    }).catch(err => {
+      console.error('Error', err);
+    })
+
+    showItemsAndTotalPrice(data);
+
+    // ローディングアイコンとfucusを消す
+    document.getElementById('product-page__add-btn').innerHTML = 'カートに入れる';
+    document.getElementById('product-page__add-btn').blur();
+
+    // カートドロワーを開く
+    document.getElementById('cart-nav').classList.toggle('drawer-open');
+    toggleFadeLayer();
+  }
+</script>
+
+
+
